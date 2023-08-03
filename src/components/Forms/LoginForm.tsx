@@ -17,7 +17,7 @@ const loginSchema = z.object({
 type loginSc = z.infer<typeof loginSchema>;
 
 
-export function LoginForm () {
+export function LoginForm() {
     const navigate = useNavigate();
     const { signIn } = useAuthStore((state) => ({
         signIn: state.setToken,
@@ -31,56 +31,61 @@ export function LoginForm () {
         }
     })
 
-    async function onSubmit (values: loginSc) {
+    async function onSubmit(values: loginSc) {
         const res = await baseApi.post("/auth/login", {
             login: values.username,
             password: values.password
         });
 
-        if (res.data.token && typeof res.data.token == "string") {
-            signIn(res.data.token);
-            
-            // setTimeout(() => {
+        if (res.status === 200) {
+            if (res.data.token && typeof res.data.token == "string") {
+                signIn(res.data.token);
+
                 navigate("/protected")
-            // }, 1500);
+
+                return;
+            }
         }
 
+        // TODO: Notify failed login
+
+
     }
-    
+
     return (
         <section>
             <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField 
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel htmlFor="username">Username</FormLabel>
-                        <FormControl>
-                            <Input id="username" placeholder="davi@gmail.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="username"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel htmlFor="username">Username</FormLabel>
+                                <FormControl>
+                                    <Input id="username" placeholder="davi@gmail.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            <FormField 
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel htmlFor="password">Password</FormLabel>
-                        <FormControl>
-                            <Input id="password" type="password" placeholder="●●●●●●●●" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-            <Button type="submit">Login</Button>
-        </form>
-    </Form>
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel htmlFor="password">Password</FormLabel>
+                                <FormControl>
+                                    <Input id="password" type="password" placeholder="●●●●●●●●" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <Button type="submit">Login</Button>
+                </form>
+            </Form>
         </section>
     )
 }
