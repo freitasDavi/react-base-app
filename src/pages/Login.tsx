@@ -1,17 +1,18 @@
+import { Footer } from "@/components/Footer";
 import { LoginForm } from "@/components/Forms/LoginForm";
-import { Link } from "react-router-dom";
+import { UnAuthNavbar } from "@/components/UnAuthNavbar";
+import { Toaster } from "@/components/ui/toaster";
 
-
-export function Login () {
+export function Login() {
     return (
         <div>
-            <h1 className="text-3xl font-bold">Hello from login!</h1>
-            <Link to="/" className="underline text-blue-500 hover:text-blue-700">Home</Link>
-
-            <main>
+            <UnAuthNavbar />
+            <main className="mt-36 mx-auto w-2/4 min-h-[57vh]">
                 <h1 className="text-2xl font-bold text-gray-700">Login</h1>
                 <LoginForm />
+                <Toaster />
             </main>
+            <Footer />
         </div>
     )
 }

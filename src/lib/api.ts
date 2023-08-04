@@ -38,12 +38,12 @@ baseApi.interceptors.response.use((res) => res, async (requestError) => {
             if (!originalRequest.responseURL.includes("auth/login")) {
                 window.location.replace("/login");
             } else {
-                return requestError;
+                throw requestError;
             }
         }
     }
 
-    return requestError;
+    throw requestError;
 })
 
 // baseApi.registerInterceptTokenManager = signOut => {

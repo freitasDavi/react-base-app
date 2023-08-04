@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { baseApi } from "@/lib/api";
 
 import useAuthStore from "@/store/AuthStore";
-import { redirect, useNavigate, useNavigation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../ui/use-toast";
+import { Toaster } from "../ui/toaster";
 
 const loginSchema = z.object({
     username: z.string().email("Não é um email válido"),
@@ -20,6 +21,8 @@ type loginSc = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
     const { toast } = useToast();
     const { signIn } = useAuthStore((state) => ({
         signIn: state.setToken,
@@ -34,32 +37,39 @@ export function LoginForm() {
     })
 
     async function onSubmit(values: loginSc) {
-        const res = await baseApi.post("/auth/login", {
-            login: values.username,
-            password: values.password
-        });
 
-        if (res.status === 200) {
-            if (res.data.token && typeof res.data.token == "string") {
-                signIn(res.data.token);
+        try {
+            const res = await baseApi.post("/auth/login", {
+                login: values.username,
+                password: values.password
+            });
 
-                toast({
-                    variant: "success",
-                    title: "Sucesso",
-                    description: "Login efetuado com sucesso, redirecionando..."
-                })
+            if (res.status === 200) {
+                if (res.data.token && typeof res.data.token == "string") {
+                    signIn(res.data.token);
 
-                setTimeout(() => {
-                    navigate("/protected")
-                }, 1000);
+                    toast({
+                        variant: "success",
+                        title: "Sucesso",
+                        description: "Login efetuado com sucesso, redirecionando..."
+                    })
 
-                return;
+                    setTimeout(() => {
+                        navigate(from, { replace: true });
+                    }, 1000);
+
+                    return;
+                }
             }
+        } catch (err) {
+            // TODO: Notify failed login
+            console.log('Error');
+            toast({
+                variant: "destructive",
+                title: "Erro",
+                description: "Login ou senha incorreta",
+            })
         }
-
-        // TODO: Notify failed login
-
-
     }
 
     return (

@@ -17,7 +17,8 @@ export function Client() {
             .then(() => toast({
                 title: "Sucesso",
                 variant: "success",
-                description: "Registros recuperados com sucesso"
+                description: "Registros recuperados com sucesso",
+                duration: 1000,
             }))
             .catch((err) => toast({
                 title: "Ops",
@@ -32,7 +33,7 @@ export function Client() {
 
     return (
         <main className="flex flex-col w-[60%] bg-slate-800 h-screen text-white mx-auto p-20 gap-10">
-            <h1 className="text-3xl font-black leading-tight text-indig-500">Client</h1>
+            <h1 className="text-3xl font-black leading-tight text-indig-500">Clientes</h1>
             {data && (
                 <section>
                     <DataTable
