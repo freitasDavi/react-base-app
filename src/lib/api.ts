@@ -15,6 +15,8 @@ export const baseApi = axios.create({
 baseApi.interceptors.request.use(async (req) => {
     const authToken = getState().token;
 
+    console.log(authToken);
+
     if (authToken) {
         req.headers.Authorization = `Bearer ${authToken}`;
     }

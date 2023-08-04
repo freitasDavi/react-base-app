@@ -8,6 +8,7 @@ import { baseApi } from "@/lib/api";
 
 import useAuthStore from "@/store/AuthStore";
 import { redirect, useNavigate, useNavigation } from "react-router-dom";
+import { useToast } from "../ui/use-toast";
 
 const loginSchema = z.object({
     username: z.string().email("Não é um email válido"),
@@ -19,6 +20,7 @@ type loginSc = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const navigate = useNavigate();
+    const { toast } = useToast();
     const { signIn } = useAuthStore((state) => ({
         signIn: state.setToken,
         isLogged: state.isLogged
@@ -41,7 +43,15 @@ export function LoginForm() {
             if (res.data.token && typeof res.data.token == "string") {
                 signIn(res.data.token);
 
-                navigate("/protected")
+                toast({
+                    variant: "success",
+                    title: "Sucesso",
+                    description: "Login efetuado com sucesso, redirecionando..."
+                })
+
+                setTimeout(() => {
+                    navigate("/protected")
+                }, 1000);
 
                 return;
             }

@@ -13,7 +13,7 @@ const useAuthStore = create(persist((set) => ({
     isLogged: false,
     token: "",
     setLogin: () => set({ isLogged: true }),
-    setLogout: () => set({ isLogged: false }),
+    setLogout: () => set({ token: "" }),
     setToken: (bearer: string) => set({ token: bearer })
 }), {
     name: '@tkn-auth',
@@ -21,24 +21,24 @@ const useAuthStore = create(persist((set) => ({
     storage: createJSONStorage(() => localStorage)
 }));
 
-const useAuth = create<AuthState>()(
-    persist(
-        (set) => ({
-            isLogged: false,
-            token: "",
-            setLogin: () => set({ isLogged: true }),
-            setLogout: () => set({ isLogged: false }),
-            setToken: (bearer: string) => set({ token: bearer })
-        }),
-        {
-            name: "@tkn-auth",
-            storage: createJSONStorage(() => localStorage),
-            partialize: (state) => ({ token: state.token })
-        }
-    )
-)
+// const useAuth = create<AuthState>()(
+//     persist(
+//         (set) => ({
+//             isLogged: false,
+//             token: "",
+//             setLogin: () => set({ isLogged: true }),
+//             setLogout: () => set({ isLogged: false }),
+//             setToken: (bearer: string) => set({ token: bearer })
+//         }),
+//         {
+//             name: "@tkn-auth",
+//             storage: createJSONStorage(() => localStorage),
+//             partialize: (state) => ({ token: state.token })
+//         }
+//     )
+// )
 
-const { getState, setState } = useAuth;
+const { getState, setState } = useAuthStore;
 
 export { getState, setState }
 export default useAuthStore;

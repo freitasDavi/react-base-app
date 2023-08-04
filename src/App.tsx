@@ -1,14 +1,13 @@
-import { RouterProvider, useLocation, useNavigate } from "react-router-dom"
+import { RouterProvider } from "react-router-dom"
 import { AuthContextProvider } from "./contexts/AuthContext"
-import { router } from "./router"
-import { history } from "./lib/history"
+import { router2 } from "./router"
 
 function App() {
 
 
   return (
     <AuthContextProvider>
-      <RouterProvider router={router} />
+      <RouterProvider router={router2} />
     </AuthContextProvider>
   )
 }
