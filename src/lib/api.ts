@@ -36,8 +36,12 @@ baseApi.interceptors.response.use((response) => {
     if (error instanceof AxiosError) {
         const originalRequest = error.config as InternalAxiosRequestConfigWithRetry;
 
-        if (error.response?.status === 401 && !originalRequest._retry && !error.response.data.message.contains("User Not Found")) {
-            originalRequest._retry = true;
+        if (error.response?.status === 401) {
+            if (error.response?.data?.error.includes("User Not Found")) {
+                return Promise.reject(error);
+            }
+
+            // originalRequest._retry = true;
             const refreshToken = getState().refreshToken;
 
             const response = await baseApi.post("/auth/refreshtoken", {
