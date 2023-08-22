@@ -9,10 +9,9 @@ import { baseApi } from "@/lib/api";
 import useAuthStore from "@/store/AuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../ui/use-toast";
-import { Toaster } from "../ui/toaster";
 
 const loginSchema = z.object({
-    username: z.string().email("Não é um email válido"),
+    username: z.string(),
     password: z.string().min(2)
 });
 
@@ -36,17 +35,17 @@ export function LoginForm() {
         }
     })
 
-    async function onSubmit(values: loginSc) {
+    async function onSubmit({ username, password }: loginSc) {
 
         try {
-            const res = await baseApi.post("/auth/login", {
-                login: values.username,
-                password: values.password
+            const res = await baseApi.post("/auth/signin", {
+                username: username,
+                password: password
             });
 
             if (res.status === 200) {
-                if (res.data.token && typeof res.data.token == "string") {
-                    signIn(res.data.token);
+                if (res.data.accessToken && typeof res.data.accessToken == "string") {
+                    signIn(res.data.accessToken, res.data.refreshToken);
 
                     toast({
                         variant: "success",

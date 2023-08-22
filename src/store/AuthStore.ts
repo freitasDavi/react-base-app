@@ -6,18 +6,20 @@ interface AuthState {
     setLogin: () => void;
     setLogout: () => void;
     token: string;
-    setToken: (bearer: string) => void;
+    refreshToken: string;
+    setToken: (bearer: string, refresh: string) => void;
 }
 
 const useAuthStore = create(persist((set) => ({
     isLogged: false,
     token: "",
+    refreshToken: "",
     setLogin: () => set({ isLogged: true }),
     setLogout: () => set({ token: "" }),
-    setToken: (bearer: string) => set({ token: bearer })
+    setToken: (bearer: string, refresh: string) => set({ token: bearer, refreshToken: refresh })
 }), {
     name: '@tkn-auth',
-    partialize: (state: AuthState) => ({ token: state.token }),
+    partialize: (state: AuthState) => ({ token: state.token, refreshToken: state.refreshToken }),
     storage: createJSONStorage(() => localStorage)
 }));
 

@@ -1,5 +1,5 @@
-import { getState } from "@/store/AuthStore";
-import axios, { AxiosError, AxiosInstance } from "axios";
+import { getState, setState } from "@/store/AuthStore";
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { history } from "./history";
 
 type SignOut = () => void;
@@ -8,43 +8,96 @@ type APIInstanceProps = AxiosInstance & {
     registerInterceptTokenManager: (signOut: SignOut) => () => void;
 }
 
+type InternalAxiosRequestConfigWithRetry = InternalAxiosRequestConfig<any> & {
+    _retry: boolean
+};
+
 export const baseApi = axios.create({
     baseURL: "http://localhost:8080/api"
 });
 
-baseApi.interceptors.request.use(async (req) => {
-    const authToken = getState().token;
+// Add token to every request
+baseApi.interceptors.request.use(
+    async config => {
+        const authToken = getState().token;
 
-    console.log(authToken);
+        config.headers.Authorization = `Bearer ${authToken}`;
+        config.headers.Accept = "application/json";
+        config.headers["Content-Type"] = "application/json";
 
-    if (authToken) {
-        req.headers.Authorization = `Bearer ${authToken}`;
-    }
+        return config;
+    },
+    error => Promise.reject(error)
+);
 
-    return req;
-});
+baseApi.interceptors.response.use((response) => {
+    return response
+}, async error => {
+    if (error instanceof AxiosError) {
+        const originalRequest = error.config as InternalAxiosRequestConfigWithRetry;
 
-baseApi.interceptors.response.use((res) => res, async (requestError) => {
+        if (error.response?.status === 401 && !originalRequest._retry && !error.response.data.message.contains("User Not Found")) {
+            originalRequest._retry = true;
+            const refreshToken = getState().refreshToken;
 
-    if (requestError instanceof AxiosError) {
-        if (requestError.response?.status === 403) {
-            const originalRequest = await requestError.request;
+            const response = await baseApi.post("/auth/refreshtoken", {
+                refreshToken
+            });
 
-            console.log(originalRequest.responseURL);
+            setState({
+                refreshToken: response.data.refreshToken,
+                token: response.data.accessToken
+            });
 
-            // console.log(urlRequest);
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.accessToken;
 
-
-            if (!originalRequest.responseURL.includes("auth/login")) {
-                window.location.replace("/login");
-            } else {
-                throw requestError;
-            }
+            return baseApi(originalRequest);
         }
+
+        return Promise.reject(error);
     }
 
-    throw requestError;
+    return Promise.reject(error);
 })
+
+// baseApi.interceptors.request.use(async (req) => {
+//     const authToken = getState().token;
+
+//     console.log(authToken);
+
+//     if (authToken) {
+//         req.headers.Authorization = `Bearer ${authToken}`;
+//     }
+
+//     return req;
+// });
+
+// baseApi.interceptors.response.use((res) => res, async (requestError) => {
+
+//     if (requestError instanceof AxiosError) {
+
+//         if (requestError.response?.status === 401) {
+//             const originalRequest = await requestError.request;
+//         }
+
+//         if (requestError.response?.status === 403) {
+//             const originalRequest = await requestError.request;
+
+//             console.log(originalRequest.responseURL);
+
+//             // console.log(urlRequest);
+
+
+//             if (!originalRequest.responseURL.includes("auth/login")) {
+//                 window.location.replace("/login");
+//             } else {
+//                 throw requestError;
+//             }
+//         }
+//     }
+
+//     throw requestError;
+// })
 
 // baseApi.registerInterceptTokenManager = signOut => {
 //     const interceptTokenManager = baseApi.interceptors.response.use(response => response, async (requestError) => {

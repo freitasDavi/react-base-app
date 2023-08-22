@@ -12,7 +12,7 @@ export function Client() {
 
     useEffect(() => {
 
-        baseApi.get("/clientes")
+        baseApi.get("/testes")
             .then((response) => setData(response.data))
             .then(() => toast({
                 title: "Sucesso",
